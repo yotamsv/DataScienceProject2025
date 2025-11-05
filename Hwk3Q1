@@ -1,0 +1,82 @@
+import time
+import numpy as np
+from sklearn.datasets import fetch_openml
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+# Load the Fashion-MNIST dataset
+fashion_mnist = fetch_openml('Fashion-MNIST', version=1)
+
+# Convert the data into numpy arrays
+X = np.array(fashion_mnist.data)
+y = np.array(fashion_mnist.target, dtype=int)
+
+# Split into training and test sets (80% train, 20% test)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Normalize the data (important for neural networks)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Function to train and evaluate the model
+def train_and_evaluate_model(model, X_train, y_train, X_test, y_test):
+    start_time = time.time()  # Start the timer
+    
+    # Train the model
+    model.fit(X_train, y_train)
+    
+    # Measure training time
+    train_time = time.time() - start_time
+    
+    # Make predictions
+    y_pred = model.predict(X_test)
+    
+    # Evaluate accuracy
+    accuracy = accuracy_score(y_test, y_pred)
+    
+    # Generate confusion matrix
+    conf_matrix = confusion_matrix(y_test, y_pred)
+    
+    # Output results
+    print("Training Time: {:.4f} seconds".format(train_time))
+    print("Accuracy: {:.4f}".format(accuracy))
+    print("Confusion Matrix:\n", conf_matrix)
+    print("-" * 50)
+
+# Baseline model: simple 1 hidden layer with 100 neurons
+print("### Baseline Model ###")
+model_1 = MLPClassifier(hidden_layer_sizes=(100,), max_iter=300, random_state=42)
+train_and_evaluate_model(model_1, X_train, y_train, X_test, y_test)
+
+# Experiment 1: 2 hidden layers with 128 and 64 neurons
+print("### Experiment 1: 2 Hidden Layers ###")
+model_2 = MLPClassifier(hidden_layer_sizes=(128, 64), max_iter=300, random_state=42)
+train_and_evaluate_model(model_2, X_train, y_train, X_test, y_test)
+
+# Experiment 2: Use 'tanh' activation function
+print("### Experiment 2: Tanh Activation ###")
+model_3 = MLPClassifier(hidden_layer_sizes=(100,), activation='tanh', max_iter=300, random_state=42)
+train_and_evaluate_model(model_3, X_train, y_train, X_test, y_test)
+
+# Experiment 3: Use 'adam' solver and learning rate of 0.001
+print("### Experiment 3: Adam Solver with Learning Rate 0.001 ###")
+model_4 = MLPClassifier(hidden_layer_sizes=(100,), solver='adam', learning_rate_init=0.001, max_iter=300, random_state=42)
+train_and_evaluate_model(model_4, X_train, y_train, X_test, y_test)
+
+# Experiment 4: Add L2 regularization (alpha=0.001) and early stopping
+print("### Experiment 4: Regularization and Early Stopping ###")
+model_5 = MLPClassifier(hidden_layer_sizes=(100,), alpha=0.001, early_stopping=True, max_iter=300, random_state=42)
+train_and_evaluate_model(model_5, X_train, y_train, X_test, y_test)
+
+# Experiment 5: Increase hidden layers with 256, 128, 64 neurons
+print("### Experiment 5: More Hidden Layers ###")
+model_6 = MLPClassifier(hidden_layer_sizes=(256, 128, 64), max_iter=300, random_state=42)
+train_and_evaluate_model(model_6, X_train, y_train, X_test, y_test)
+
+# Experiment 6: Decrease hidden layers to 50 neurons
+print("### Experiment 6: Smaller Hidden Layers ###")
+model_7 = MLPClassifier(hidden_layer_sizes=(50,), max_iter=300, random_state=42)
+train_and_evaluate_model(model_7, X_train, y_train, X_test, y_test)
